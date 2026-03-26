@@ -27,7 +27,6 @@ SEARCH_FIELDS = [
 ]
 
 DETAIL_FIELDS = [
-    ("row_number", "行号"),
     ("group_label", "分组"),
     ("category", "类别"),
     ("strain_name", "菌株"),
@@ -49,7 +48,6 @@ METRIC_FIELDS = [
 ]
 
 TABLE_COLUMNS = [
-    "row_number",
     "category",
     "strain_name",
     "external_name",
@@ -64,7 +62,6 @@ TABLE_COLUMNS = [
 ]
 
 TABLE_LABELS = {
-    "row_number": "行号",
     "category": "类别",
     "strain_name": "菌株",
     "external_name": "外部编号",
@@ -78,7 +75,7 @@ TABLE_LABELS = {
     "lactose_ppm": "乳糖",
 }
 
-QUICK_SEARCHES = ["HN019", "M-16V", "阿克曼菌", "善恩康"]
+SAMPLE_HINTS = ["阿克曼菌", "M-16V", "善恩康", "李瑞"]
 
 
 st.set_page_config(page_title="竞品数据库", page_icon="🔎", layout="wide")
@@ -101,26 +98,26 @@ def inject_styles() -> None:
         @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Noto+Sans+SC:wght@400;500;700&display=swap');
 
         :root {
-          --bg-start: #07111f;
-          --bg-end: #111f38;
-          --paper: rgba(13, 25, 45, 0.72);
-          --paper-strong: rgba(18, 32, 58, 0.82);
-          --ink: #f5fbff;
-          --muted: #96a7c6;
-          --line: rgba(120, 172, 255, 0.16);
-          --accent: #4ee6ff;
-          --accent-soft: rgba(78, 230, 255, 0.12);
-          --warm: #ff8a5b;
-          --violet: #7c7cff;
+          --bg-start: #101722;
+          --bg-end: #1b2230;
+          --paper: rgba(27, 34, 48, 0.72);
+          --paper-strong: rgba(36, 45, 62, 0.82);
+          --ink: #f4f1eb;
+          --muted: #b0b6c2;
+          --line: rgba(180, 196, 214, 0.14);
+          --accent: #88d7cb;
+          --accent-soft: rgba(136, 215, 203, 0.12);
+          --warm: #f1a97a;
+          --violet: #b7a7d9;
           --shadow: 0 28px 64px rgba(2, 8, 20, 0.42);
           --radius: 22px;
         }
 
         .stApp {
           background:
-            radial-gradient(circle at top left, rgba(124, 124, 255, 0.22), transparent 26%),
-            radial-gradient(circle at top right, rgba(78, 230, 255, 0.20), transparent 22%),
-            radial-gradient(circle at bottom right, rgba(255, 138, 91, 0.14), transparent 20%),
+            radial-gradient(circle at top left, rgba(183, 167, 217, 0.16), transparent 26%),
+            radial-gradient(circle at top right, rgba(136, 215, 203, 0.14), transparent 22%),
+            radial-gradient(circle at bottom right, rgba(241, 169, 122, 0.12), transparent 20%),
             linear-gradient(180deg, var(--bg-start), var(--bg-end));
           color: var(--ink);
           font-family: "Space Grotesk", "Noto Sans SC", sans-serif;
@@ -132,8 +129,8 @@ def inject_styles() -> None:
         }
 
         [data-testid="stSidebar"] {
-          background: rgba(7, 15, 28, 0.86);
-          border-right: 1px solid rgba(120, 172, 255, 0.12);
+          background: rgba(20, 26, 38, 0.88);
+          border-right: 1px solid rgba(180, 196, 214, 0.10);
           backdrop-filter: blur(18px);
         }
 
@@ -154,8 +151,8 @@ def inject_styles() -> None:
           border: 1px solid var(--line);
           border-radius: 28px;
           background:
-            linear-gradient(140deg, rgba(18, 32, 58, 0.92), rgba(11, 22, 40, 0.84)),
-            radial-gradient(circle at top right, rgba(78, 230, 255, 0.14), transparent 30%);
+            linear-gradient(140deg, rgba(43, 50, 66, 0.92), rgba(26, 32, 45, 0.86)),
+            radial-gradient(circle at top right, rgba(136, 215, 203, 0.12), transparent 30%);
           box-shadow: var(--shadow);
           backdrop-filter: blur(18px);
         }
@@ -168,7 +165,7 @@ def inject_styles() -> None:
           width: 180px;
           height: 180px;
           border-radius: 50%;
-          background: radial-gradient(circle, rgba(78, 230, 255, 0.28), rgba(78, 230, 255, 0));
+          background: radial-gradient(circle, rgba(183, 167, 217, 0.22), rgba(183, 167, 217, 0));
           filter: blur(4px);
         }
 
@@ -178,8 +175,8 @@ def inject_styles() -> None:
           gap: 0.45rem;
           padding: 0.42rem 0.8rem;
           border-radius: 999px;
-          background: rgba(78, 230, 255, 0.12);
-          border: 1px solid rgba(78, 230, 255, 0.24);
+          background: rgba(136, 215, 203, 0.12);
+          border: 1px solid rgba(136, 215, 203, 0.18);
           color: var(--accent);
           font-size: 0.76rem;
           font-weight: 700;
@@ -213,7 +210,7 @@ def inject_styles() -> None:
           padding: 1rem 1rem 0.95rem;
           border: 1px solid var(--line);
           border-radius: 18px;
-          background: linear-gradient(180deg, rgba(18, 34, 61, 0.88), rgba(14, 25, 46, 0.82));
+          background: linear-gradient(180deg, rgba(47, 56, 74, 0.88), rgba(35, 43, 59, 0.82));
           box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
         }
 
@@ -263,9 +260,9 @@ def inject_styles() -> None:
           margin: 0.8rem 0 0.25rem;
           padding: 0.85rem 1rem;
           border-radius: 16px;
-          background: linear-gradient(135deg, rgba(78, 230, 255, 0.12), rgba(124, 124, 255, 0.12));
-          border: 1px solid rgba(78, 230, 255, 0.18);
-          color: #dffcff;
+          background: linear-gradient(135deg, rgba(136, 215, 203, 0.12), rgba(183, 167, 217, 0.10));
+          border: 1px solid rgba(136, 215, 203, 0.14);
+          color: #eef5f2;
           font-size: 0.92rem;
           font-weight: 600;
         }
@@ -295,7 +292,7 @@ def inject_styles() -> None:
           border-radius: 999px;
           background: rgba(255, 255, 255, 0.05);
           border: 1px solid var(--line);
-          color: #dff6ff;
+          color: #eef4f0;
           font-size: 0.76rem;
         }
 
@@ -331,7 +328,7 @@ def inject_styles() -> None:
           padding: 0.72rem 0.82rem;
           border-radius: 14px;
           background: rgba(255, 255, 255, 0.04);
-          border: 1px solid rgba(120, 172, 255, 0.10);
+          border: 1px solid rgba(180, 196, 214, 0.08);
         }
 
         .meta-label,
@@ -353,8 +350,8 @@ def inject_styles() -> None:
           border: 1px solid var(--line);
           border-radius: 22px;
           background:
-            linear-gradient(180deg, rgba(20, 36, 64, 0.94), rgba(11, 22, 40, 0.88)),
-            radial-gradient(circle at top right, rgba(124, 124, 255, 0.14), transparent 26%);
+            linear-gradient(180deg, rgba(46, 55, 72, 0.94), rgba(30, 37, 50, 0.90)),
+            radial-gradient(circle at top right, rgba(183, 167, 217, 0.12), transparent 26%);
         }
 
         .detail-title {
@@ -391,23 +388,31 @@ def inject_styles() -> None:
         }
 
         .stTextInput input {
-          background: rgba(255,255,255,0.05) !important;
-          color: var(--ink) !important;
-          border: 1px solid rgba(120, 172, 255, 0.16) !important;
+          background: rgba(250, 247, 242, 0.96) !important;
+          color: #1c2430 !important;
+          caret-color: #1c2430 !important;
+          border: 1px solid rgba(180, 196, 214, 0.20) !important;
+          -webkit-text-fill-color: #1c2430 !important;
         }
 
         .stSelectbox [data-baseweb="select"] > div {
-          background: rgba(255,255,255,0.05) !important;
-          border: 1px solid rgba(120, 172, 255, 0.16) !important;
+          background: rgba(250, 247, 242, 0.94) !important;
+          border: 1px solid rgba(180, 196, 214, 0.18) !important;
+          color: #1c2430 !important;
+        }
+
+        .stTextInput input::placeholder {
+          color: #758091 !important;
+          -webkit-text-fill-color: #758091 !important;
         }
 
         .stButton > button {
           border-radius: 14px !important;
-          border: 1px solid rgba(78, 230, 255, 0.22) !important;
-          background: linear-gradient(135deg, #00c2ff, #5b7cff) !important;
-          color: white !important;
+          border: 1px solid rgba(136, 215, 203, 0.18) !important;
+          background: linear-gradient(135deg, #8fd2c8, #b7a7d9) !important;
+          color: #18202a !important;
           font-weight: 600 !important;
-          box-shadow: 0 10px 24px rgba(0, 194, 255, 0.22) !important;
+          box-shadow: 0 10px 24px rgba(120, 134, 168, 0.18) !important;
         }
 
         .stTabs [data-baseweb="tab-list"] {
@@ -419,6 +424,13 @@ def inject_styles() -> None:
           border-radius: 999px;
           background: rgba(255, 255, 255, 0.05);
           padding: 0 1rem;
+        }
+
+        .sample-hint {
+          margin: 0.35rem 0 0.75rem;
+          color: var(--muted);
+          font-size: 0.84rem;
+          line-height: 1.7;
         }
 
         @media (max-width: 900px) {
@@ -538,7 +550,7 @@ def render_active_filters(filters: list[str]) -> None:
 def record_option_label(record: dict) -> str:
     core = record.get("external_name") or record.get("strain_name") or "未命名样品"
     source = record.get("source") or "-"
-    return f"{record.get('row_number', '')} | {core} | {source}"
+    return f"{core} | {source}"
 
 
 def record_card_html(record: dict) -> str:
@@ -634,16 +646,15 @@ if "keyword" not in st.session_state:
 
 render_hero(stats)
 
-quick_cols = st.columns(len(QUICK_SEARCHES))
-for col, quick_search in zip(quick_cols, QUICK_SEARCHES):
-    with col:
-        if st.button(quick_search, use_container_width=True):
-            st.session_state.keyword = quick_search
+st.markdown(
+    f'<div class="sample-hint">可试搜：{" / ".join(SAMPLE_HINTS)}</div>',
+    unsafe_allow_html=True,
+)
 
 keyword = st.text_input(
     "搜索关键词",
     key="keyword",
-    placeholder="例如：阿克曼菌、HN019、M-16V、善恩康",
+    placeholder="例如：阿克曼菌、M-16V、善恩康、李瑞",
 )
 
 with st.sidebar:
