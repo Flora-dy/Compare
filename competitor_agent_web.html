@@ -1,0 +1,725 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>竞品数据库</title>
+  <style>
+    :root {
+      --bg: #f4f1ea;
+      --panel: #fffdf8;
+      --panel-soft: #f8f5ee;
+      --ink: #1d1f1d;
+      --muted: #6d7068;
+      --line: #ddd6ca;
+      --accent: #1f5f4a;
+      --accent-soft: #dfeee8;
+      --shadow: 0 18px 40px rgba(36, 31, 23, 0.08);
+      --radius: 18px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top left, rgba(31, 95, 74, 0.08), transparent 26%),
+        linear-gradient(180deg, #f8f5ef, #f1eee7);
+      font-family: "PingFang SC", "Noto Sans SC", "Microsoft YaHei", sans-serif;
+    }
+
+    .shell {
+      width: min(1280px, calc(100vw - 28px));
+      margin: 0 auto;
+      padding: 24px 0 32px;
+    }
+
+    .hero,
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+    }
+
+    .hero {
+      padding: 28px;
+      margin-bottom: 16px;
+    }
+
+    .eyebrow {
+      display: inline-block;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+    }
+
+    h1 {
+      margin: 14px 0 8px;
+      font-size: clamp(30px, 5vw, 50px);
+      line-height: 1.05;
+      letter-spacing: -0.04em;
+      font-family: "Iowan Old Style", "Songti SC", serif;
+    }
+
+    .hero p {
+      margin: 0 0 18px;
+      max-width: 760px;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    .search-bar {
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      gap: 10px;
+    }
+
+    input,
+    select,
+    button {
+      font: inherit;
+    }
+
+    input,
+    select {
+      width: 100%;
+      min-width: 0;
+      padding: 13px 14px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #fff;
+      color: var(--ink);
+    }
+
+    input:focus,
+    select:focus {
+      outline: none;
+      border-color: #9ebaaa;
+    }
+
+    button {
+      border: 0;
+      border-radius: 14px;
+      padding: 13px 18px;
+      cursor: pointer;
+    }
+
+    button:disabled {
+      cursor: wait;
+      opacity: 0.7;
+    }
+
+    .primary {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .secondary {
+      background: #ece7dd;
+      color: var(--ink);
+    }
+
+    .quick-row,
+    .meta-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .chip {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 7px 11px;
+      background: var(--panel-soft);
+      color: var(--ink);
+      font-size: 12px;
+    }
+
+    .chip-btn {
+      cursor: pointer;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .stat-card {
+      padding: 14px;
+      border-radius: 16px;
+      background: var(--panel-soft);
+      border: 1px solid var(--line);
+    }
+
+    .stat-card span {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .stat-card strong {
+      display: block;
+      margin-top: 6px;
+      font-size: 26px;
+      letter-spacing: -0.04em;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 320px minmax(0, 1fr) 360px;
+      gap: 16px;
+      align-items: start;
+    }
+
+    .panel {
+      padding: 18px;
+    }
+
+    .panel h2 {
+      margin: 0 0 6px;
+      font-size: 20px;
+      letter-spacing: -0.03em;
+    }
+
+    .panel p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .filters {
+      display: grid;
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .field {
+      display: grid;
+      gap: 7px;
+    }
+
+    .field label {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 4px;
+    }
+
+    .result-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .result-head strong {
+      font-size: 16px;
+    }
+
+    .result-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .result-item {
+      padding: 14px;
+      border-radius: 16px;
+      border: 1px solid var(--line);
+      background: var(--panel-soft);
+      cursor: pointer;
+      transition: border-color 120ms ease, background 120ms ease;
+    }
+
+    .result-item.active {
+      border-color: #8eb19f;
+      background: #eef6f2;
+    }
+
+    .result-item h3 {
+      margin: 8px 0 6px;
+      font-size: 18px;
+      line-height: 1.35;
+    }
+
+    .result-item p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .empty {
+      padding: 16px;
+      border-radius: 16px;
+      background: var(--panel-soft);
+      border: 1px dashed var(--line);
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.7;
+    }
+
+    .detail-card {
+      padding: 16px;
+      border-radius: 18px;
+      background: var(--panel-soft);
+      border: 1px solid var(--line);
+    }
+
+    .detail-card h3 {
+      margin: 10px 0 14px;
+      font-size: 22px;
+      line-height: 1.3;
+      letter-spacing: -0.03em;
+    }
+
+    .detail-list {
+      display: grid;
+      gap: 10px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .detail-list li {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(109, 112, 104, 0.12);
+      font-size: 14px;
+    }
+
+    .detail-list li span:first-child {
+      color: var(--muted);
+      flex: 0 0 auto;
+    }
+
+    .detail-list li span:last-child {
+      text-align: right;
+      overflow-wrap: anywhere;
+    }
+
+    .detail-section {
+      margin-top: 14px;
+    }
+
+    .detail-section h4 {
+      margin: 0 0 10px;
+      font-size: 14px;
+      color: var(--muted);
+      letter-spacing: 0.02em;
+    }
+
+    .summary-box {
+      margin-top: 16px;
+      padding: 14px;
+      border-radius: 16px;
+      background: #1f2321;
+      color: #eef2ee;
+      font-family: "SFMono-Regular", "Consolas", monospace;
+      font-size: 12px;
+      line-height: 1.6;
+      white-space: pre-wrap;
+      max-height: 280px;
+      overflow: auto;
+    }
+
+    @media (max-width: 1180px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .stats {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 720px) {
+      .shell {
+        width: min(100vw - 16px, 1280px);
+        padding-top: 10px;
+      }
+
+      .hero,
+      .panel {
+        padding: 16px;
+      }
+
+      .search-bar,
+      .actions {
+        grid-template-columns: 1fr;
+      }
+
+      .stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <section class="hero">
+      <span class="eyebrow">Competitor Database</span>
+      <h1>竞品数据库</h1>
+      <p>页面只保留最核心的能力：搜索竞品、按字段筛选、查看命中结果、查看单条详情。输入菌株名、外部编号、来源或负责人即可。</p>
+      <form id="search-form" class="search-bar">
+        <input id="search-input" name="keyword" placeholder="搜索关键词，例如：阿克曼菌 / HN019 / M-16V / 善恩康">
+        <button class="primary" type="submit">搜索</button>
+        <button class="secondary" id="load-all" type="button">查看全部</button>
+      </form>
+      <div class="quick-row">
+        <button class="chip chip-btn quick-search" type="button" data-keyword="HN019">HN019</button>
+        <button class="chip chip-btn quick-search" type="button" data-keyword="M-16V">M-16V</button>
+        <button class="chip chip-btn quick-search" type="button" data-keyword="阿克曼菌">阿克曼菌</button>
+        <button class="chip chip-btn quick-search" type="button" data-keyword="善恩康">善恩康</button>
+      </div>
+      <div class="stats" id="stats"></div>
+    </section>
+
+    <div class="layout">
+      <aside class="panel">
+        <h2>筛选条件</h2>
+        <p>如果你已经知道字段，可以直接缩小结果范围。</p>
+        <form id="filter-form" class="filters">
+          <div class="field">
+            <label for="filter-strain">菌株</label>
+            <input id="filter-strain" name="strain" list="strain-options" placeholder="如：嗜黏蛋白阿克曼氏菌">
+          </div>
+          <div class="field">
+            <label for="filter-external">外部编号/名称</label>
+            <input id="filter-external" name="external_name" list="external-options" placeholder="如：HN019">
+          </div>
+          <div class="field">
+            <label for="filter-source">来源</label>
+            <input id="filter-source" name="source" list="source-options" placeholder="如：恒天然">
+          </div>
+          <div class="field">
+            <label for="filter-owner">对接人</label>
+            <input id="filter-owner" name="owner" list="owner-options" placeholder="如：李瑞">
+          </div>
+          <div class="field">
+            <label for="filter-category">类别</label>
+            <input id="filter-category" name="category" list="category-options" placeholder="如：竞品">
+          </div>
+          <div class="field">
+            <label for="filter-group">分组</label>
+            <input id="filter-group" name="group" list="group-options" placeholder="如：HTR 5包菌粉">
+          </div>
+          <div class="field">
+            <label for="filter-date">时间节点</label>
+            <input id="filter-date" name="date" placeholder="如：202601 或 2026-01">
+          </div>
+          <div class="field">
+            <label for="filter-limit">最多显示</label>
+            <input id="filter-limit" name="limit" type="number" min="1" value="50">
+          </div>
+          <div class="actions">
+            <button class="primary" type="submit">应用筛选</button>
+            <button class="secondary" type="reset">清空</button>
+          </div>
+        </form>
+        <div class="summary-box" id="summary-text">正在读取数据...</div>
+      </aside>
+
+      <main class="panel">
+        <div class="result-head">
+          <div>
+            <h2>结果列表</h2>
+            <p id="result-subtitle">默认显示最近读取到的结果。</p>
+          </div>
+        </div>
+        <div class="meta-row" id="result-meta"></div>
+        <div class="result-list" id="result-list"></div>
+      </main>
+
+      <section class="panel">
+        <h2>详情</h2>
+        <p>点击中间任意一条结果，在这里看清楚这条竞品信息。</p>
+        <div id="detail-panel" class="empty">先在中间选择一条结果。</div>
+      </section>
+    </div>
+  </div>
+
+  <datalist id="strain-options"></datalist>
+  <datalist id="external-options"></datalist>
+  <datalist id="source-options"></datalist>
+  <datalist id="owner-options"></datalist>
+  <datalist id="category-options"></datalist>
+  <datalist id="group-options"></datalist>
+
+  <script>
+    const statsEl = document.getElementById("stats");
+    const summaryText = document.getElementById("summary-text");
+    const resultMeta = document.getElementById("result-meta");
+    const resultList = document.getElementById("result-list");
+    const detailPanel = document.getElementById("detail-panel");
+    const resultSubtitle = document.getElementById("result-subtitle");
+
+    let currentRows = [];
+    let currentSelection = 0;
+
+    async function api(path, options = {}) {
+      const response = await fetch(path, {
+        headers: { "Content-Type": "application/json" },
+        ...options
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error || "请求失败");
+      return payload;
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#39;");
+    }
+
+    function fillDatalist(id, values) {
+      const list = document.getElementById(id);
+      list.innerHTML = "";
+      values.forEach((value) => {
+        const option = document.createElement("option");
+        option.value = value;
+        list.appendChild(option);
+      });
+    }
+
+    function renderStats(stats) {
+      const cards = [
+        ["总记录", stats.records],
+        ["分组", stats.groups],
+        ["菌株", stats.strains],
+        ["来源", stats.sources],
+        ["竞品", stats.competitors]
+      ];
+      statsEl.innerHTML = cards.map(([label, value]) => `
+        <div class="stat-card">
+          <span>${escapeHtml(label)}</span>
+          <strong>${escapeHtml(value)}</strong>
+        </div>
+      `).join("");
+    }
+
+    function renderMeta(items = []) {
+      resultMeta.innerHTML = items
+        .filter(Boolean)
+        .map((item) => `<span class="chip">${escapeHtml(item)}</span>`)
+        .join("");
+    }
+
+    function rowTitle(row) {
+      return row.external_name || row.internal_id || row.strain_name || `记录 ${row.row_number}`;
+    }
+
+    function renderDetail(index) {
+      if (!currentRows.length || !currentRows[index]) {
+        detailPanel.className = "empty";
+        detailPanel.textContent = "先在中间选择一条结果。";
+        return;
+      }
+
+      currentSelection = index;
+      const row = currentRows[index];
+      const baseFields = [
+        ["菌株", row.strain_name],
+        ["类别", row.category],
+        ["分组", row.group_label],
+        ["外部编号", row.external_name],
+        ["内部编号", row.internal_id],
+        ["来源", row.source],
+        ["对接人", row.owner],
+        ["时间节点", row.time_node],
+        ["备注", row.remark]
+      ].filter(([, value]) => value);
+
+      const metricFields = [
+        ["总菌体/活菌", row.cell_count],
+        ["WGS", row.wgs],
+        ["气味", row.smell],
+        ["色泽", row.color],
+        ["水分", row.moisture],
+        ["乳糖", row.lactose_ppm]
+      ].filter(([, value]) => value);
+
+      detailPanel.className = "detail-card";
+      detailPanel.innerHTML = `
+        <div class="meta-row">
+          <span class="chip">${escapeHtml(row.category || "未分类")}</span>
+          <span class="chip">行号 ${escapeHtml(row.row_number || "")}</span>
+        </div>
+        <h3>${escapeHtml(rowTitle(row))}</h3>
+        <ul class="detail-list">
+          ${baseFields.map(([label, value]) => `<li><span>${escapeHtml(label)}</span><span>${escapeHtml(value)}</span></li>`).join("")}
+        </ul>
+        <div class="detail-section">
+          <h4>关键指标</h4>
+          <ul class="detail-list">
+            ${metricFields.length
+              ? metricFields.map(([label, value]) => `<li><span>${escapeHtml(label)}</span><span>${escapeHtml(value)}</span></li>`).join("")
+              : `<li><span>提示</span><span>这条记录没有可显示的关键指标</span></li>`}
+          </ul>
+        </div>
+      `;
+
+      document.querySelectorAll(".result-item").forEach((node, itemIndex) => {
+        node.classList.toggle("active", itemIndex === index);
+      });
+    }
+
+    function renderResults(rows = [], subtitle = "搜索结果") {
+      currentRows = rows;
+      currentSelection = 0;
+      resultSubtitle.textContent = subtitle;
+
+      if (!rows.length) {
+        resultList.innerHTML = `<div class="empty">没有找到匹配结果。可以换一个关键词，或减少筛选条件。</div>`;
+        renderDetail(-1);
+        return;
+      }
+
+      resultList.innerHTML = rows.map((row, index) => `
+        <article class="result-item ${index === 0 ? "active" : ""}" data-index="${index}">
+          <div class="meta-row">
+            ${row.category ? `<span class="chip">${escapeHtml(row.category)}</span>` : ""}
+            ${row.group_label ? `<span class="chip">${escapeHtml(row.group_label)}</span>` : ""}
+          </div>
+          <h3>${escapeHtml(rowTitle(row))}</h3>
+          <p>${escapeHtml([row.strain_name, row.source, row.owner].filter(Boolean).join(" / "))}</p>
+          <p>${escapeHtml([row.time_node, row.remark].filter(Boolean).join(" / "))}</p>
+        </article>
+      `).join("");
+
+      document.querySelectorAll(".result-item").forEach((node) => {
+        node.addEventListener("click", () => renderDetail(Number(node.dataset.index)));
+      });
+
+      renderDetail(0);
+    }
+
+    function formToPayload(form) {
+      const data = new FormData(form);
+      const payload = {};
+      for (const [key, value] of data.entries()) {
+        if (value === "") continue;
+        payload[key] = value;
+      }
+      return payload;
+    }
+
+    function setBusy(button, busy, busyText) {
+      if (!button.dataset.original) button.dataset.original = button.textContent;
+      button.disabled = busy;
+      button.textContent = busy ? busyText : button.dataset.original;
+    }
+
+    async function loadSummary() {
+      const payload = await api("/api/summary");
+      renderStats(payload.stats);
+      summaryText.textContent = payload.text || "";
+    }
+
+    async function loadOptions() {
+      const payload = await api("/api/options");
+      fillDatalist("strain-options", payload.options.strain_name || []);
+      fillDatalist("external-options", payload.options.external_name || []);
+      fillDatalist("source-options", payload.options.source || []);
+      fillDatalist("owner-options", payload.options.owner || []);
+      fillDatalist("category-options", payload.options.category || []);
+      fillDatalist("group-options", payload.options.group_label || []);
+    }
+
+    async function runFilter(payload, subtitle) {
+      const result = await api("/api/filter", {
+        method: "POST",
+        body: JSON.stringify({ limit: 50, ...payload })
+      });
+      renderMeta([
+        result.parsed ? `条件: ${result.parsed}` : "",
+        typeof result.count === "number" ? `命中 ${result.count} 条` : ""
+      ]);
+      renderResults(result.rows || [], subtitle);
+    }
+
+    document.getElementById("search-form").addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const form = event.currentTarget;
+      const button = form.querySelector("button[type='submit']");
+      const keyword = document.getElementById("search-input").value.trim();
+      try {
+        setBusy(button, true, "搜索中...");
+        await runFilter(keyword ? { keyword } : {}, keyword ? `关键词：${keyword}` : "全部结果");
+      } catch (error) {
+        renderMeta(["搜索失败"]);
+        renderResults([], error.message);
+      } finally {
+        setBusy(button, false, "搜索中...");
+      }
+    });
+
+    document.getElementById("filter-form").addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const form = event.currentTarget;
+      const button = form.querySelector("button[type='submit']");
+      const payload = formToPayload(form);
+      try {
+        setBusy(button, true, "筛选中...");
+        await runFilter(payload, "筛选结果");
+      } catch (error) {
+        renderMeta(["筛选失败"]);
+        renderResults([], error.message);
+      } finally {
+        setBusy(button, false, "筛选中...");
+      }
+    });
+
+    document.getElementById("filter-form").addEventListener("reset", () => {
+      setTimeout(() => {
+        renderMeta([]);
+      }, 0);
+    });
+
+    document.getElementById("load-all").addEventListener("click", async () => {
+      await runFilter({}, "全部结果");
+    });
+
+    document.querySelectorAll(".quick-search").forEach((button) => {
+      button.addEventListener("click", async () => {
+        const keyword = button.dataset.keyword || "";
+        document.getElementById("search-input").value = keyword;
+        await runFilter({ keyword }, `关键词：${keyword}`);
+      });
+    });
+
+    (async function init() {
+      try {
+        await Promise.all([loadSummary(), loadOptions()]);
+        await runFilter({}, "全部结果");
+      } catch (error) {
+        renderMeta(["初始化失败"]);
+        renderResults([], error.message);
+      }
+    })();
+  </script>
+</body>
+</html>
