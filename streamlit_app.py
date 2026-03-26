@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import json
+from collections import Counter
+from html import escape
 from pathlib import Path
 
 import pandas as pd
@@ -35,6 +37,9 @@ DETAIL_FIELDS = [
     ("owner", "对接人"),
     ("time_node", "时间节点"),
     ("remark", "备注"),
+]
+
+METRIC_FIELDS = [
     ("cell_count", "总菌体/活菌"),
     ("wgs", "WGS"),
     ("smell", "气味"),
@@ -73,6 +78,8 @@ TABLE_LABELS = {
     "lactose_ppm": "乳糖",
 }
 
+QUICK_SEARCHES = ["HN019", "M-16V", "阿克曼菌", "善恩康"]
+
 
 st.set_page_config(page_title="竞品数据库", page_icon="🔎", layout="wide")
 
@@ -85,6 +92,354 @@ def load_payload() -> dict:
     workbook_path = agent.default_workbook_path()
     records = agent.load_records(workbook_path)
     return {"records": records}
+
+
+def inject_styles() -> None:
+    st.markdown(
+        """
+        <style>
+        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Noto+Sans+SC:wght@400;500;700&display=swap');
+
+        :root {
+          --bg-start: #07111f;
+          --bg-end: #111f38;
+          --paper: rgba(13, 25, 45, 0.72);
+          --paper-strong: rgba(18, 32, 58, 0.82);
+          --ink: #f5fbff;
+          --muted: #96a7c6;
+          --line: rgba(120, 172, 255, 0.16);
+          --accent: #4ee6ff;
+          --accent-soft: rgba(78, 230, 255, 0.12);
+          --warm: #ff8a5b;
+          --violet: #7c7cff;
+          --shadow: 0 28px 64px rgba(2, 8, 20, 0.42);
+          --radius: 22px;
+        }
+
+        .stApp {
+          background:
+            radial-gradient(circle at top left, rgba(124, 124, 255, 0.22), transparent 26%),
+            radial-gradient(circle at top right, rgba(78, 230, 255, 0.20), transparent 22%),
+            radial-gradient(circle at bottom right, rgba(255, 138, 91, 0.14), transparent 20%),
+            linear-gradient(180deg, var(--bg-start), var(--bg-end));
+          color: var(--ink);
+          font-family: "Space Grotesk", "Noto Sans SC", sans-serif;
+        }
+
+        .block-container {
+          padding-top: 1.4rem;
+          padding-bottom: 2rem;
+        }
+
+        [data-testid="stSidebar"] {
+          background: rgba(7, 15, 28, 0.86);
+          border-right: 1px solid rgba(120, 172, 255, 0.12);
+          backdrop-filter: blur(18px);
+        }
+
+        [data-testid="stSidebar"] [data-testid="stVerticalBlock"] {
+          padding-top: 0.4rem;
+        }
+
+        h1, h2, h3 {
+          color: var(--ink);
+          letter-spacing: -0.03em;
+        }
+
+        .hero-shell {
+          position: relative;
+          overflow: hidden;
+          margin-bottom: 1.1rem;
+          padding: 1.6rem 1.7rem 1.5rem;
+          border: 1px solid var(--line);
+          border-radius: 28px;
+          background:
+            linear-gradient(140deg, rgba(18, 32, 58, 0.92), rgba(11, 22, 40, 0.84)),
+            radial-gradient(circle at top right, rgba(78, 230, 255, 0.14), transparent 30%);
+          box-shadow: var(--shadow);
+          backdrop-filter: blur(18px);
+        }
+
+        .hero-shell::after {
+          content: "";
+          position: absolute;
+          top: -36px;
+          right: -52px;
+          width: 180px;
+          height: 180px;
+          border-radius: 50%;
+          background: radial-gradient(circle, rgba(78, 230, 255, 0.28), rgba(78, 230, 255, 0));
+          filter: blur(4px);
+        }
+
+        .hero-badge {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.45rem;
+          padding: 0.42rem 0.8rem;
+          border-radius: 999px;
+          background: rgba(78, 230, 255, 0.12);
+          border: 1px solid rgba(78, 230, 255, 0.24);
+          color: var(--accent);
+          font-size: 0.76rem;
+          font-weight: 700;
+          letter-spacing: 0.06em;
+          text-transform: uppercase;
+        }
+
+        .hero-title {
+          margin: 0.9rem 0 0.4rem;
+          font-family: "Space Grotesk", "Noto Sans SC", sans-serif;
+          font-size: clamp(2rem, 3vw, 3.3rem);
+          line-height: 1.06;
+          text-transform: none;
+        }
+
+        .hero-copy {
+          max-width: 760px;
+          color: var(--muted);
+          font-size: 0.98rem;
+          line-height: 1.72;
+        }
+
+        .metric-grid {
+          display: grid;
+          grid-template-columns: repeat(4, minmax(0, 1fr));
+          gap: 0.9rem;
+          margin: 1rem 0 0.3rem;
+        }
+
+        .metric-card {
+          padding: 1rem 1rem 0.95rem;
+          border: 1px solid var(--line);
+          border-radius: 18px;
+          background: linear-gradient(180deg, rgba(18, 34, 61, 0.88), rgba(14, 25, 46, 0.82));
+          box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+        }
+
+        .metric-label {
+          color: var(--muted);
+          font-size: 0.8rem;
+        }
+
+        .metric-value {
+          margin-top: 0.35rem;
+          font-size: 1.9rem;
+          font-weight: 700;
+          letter-spacing: -0.05em;
+          color: var(--ink);
+        }
+
+        .panel-shell {
+          padding: 1rem 1.05rem 1.05rem;
+          border: 1px solid var(--line);
+          border-radius: var(--radius);
+          background: var(--paper);
+          box-shadow: var(--shadow);
+          backdrop-filter: blur(16px);
+        }
+
+        .section-kicker {
+          color: var(--warm);
+          font-size: 0.78rem;
+          font-weight: 700;
+          letter-spacing: 0.06em;
+          text-transform: uppercase;
+        }
+
+        .section-title {
+          margin: 0.35rem 0 0.15rem;
+          font-size: 1.22rem;
+          font-weight: 700;
+        }
+
+        .section-copy {
+          color: var(--muted);
+          font-size: 0.9rem;
+          line-height: 1.62;
+        }
+
+        .summary-bar {
+          margin: 0.8rem 0 0.25rem;
+          padding: 0.85rem 1rem;
+          border-radius: 16px;
+          background: linear-gradient(135deg, rgba(78, 230, 255, 0.12), rgba(124, 124, 255, 0.12));
+          border: 1px solid rgba(78, 230, 255, 0.18);
+          color: #dffcff;
+          font-size: 0.92rem;
+          font-weight: 600;
+        }
+
+        .filter-note {
+          margin-top: 0.8rem;
+          padding: 0.8rem 0.9rem;
+          border-radius: 16px;
+          background: rgba(255, 255, 255, 0.04);
+          border: 1px solid rgba(120, 172, 255, 0.12);
+          color: var(--muted);
+          font-size: 0.84rem;
+          line-height: 1.65;
+        }
+
+        .chip-row {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 0.45rem;
+          margin-top: 0.75rem;
+        }
+
+        .chip {
+          display: inline-flex;
+          align-items: center;
+          padding: 0.4rem 0.72rem;
+          border-radius: 999px;
+          background: rgba(255, 255, 255, 0.05);
+          border: 1px solid var(--line);
+          color: #dff6ff;
+          font-size: 0.76rem;
+        }
+
+        .record-card {
+          padding: 1rem 1.05rem;
+          border: 1px solid var(--line);
+          border-radius: 18px;
+          background: var(--paper-strong);
+          margin-bottom: 0.8rem;
+          box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+        }
+
+        .record-title {
+          margin: 0.55rem 0 0.35rem;
+          font-size: 1.08rem;
+          font-weight: 700;
+          line-height: 1.45;
+        }
+
+        .record-meta,
+        .detail-grid {
+          display: grid;
+          gap: 0.5rem;
+        }
+
+        .record-meta {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          margin-top: 0.75rem;
+        }
+
+        .meta-item,
+        .detail-item {
+          padding: 0.72rem 0.82rem;
+          border-radius: 14px;
+          background: rgba(255, 255, 255, 0.04);
+          border: 1px solid rgba(120, 172, 255, 0.10);
+        }
+
+        .meta-label,
+        .detail-label {
+          color: var(--muted);
+          font-size: 0.74rem;
+        }
+
+        .meta-value,
+        .detail-value {
+          margin-top: 0.18rem;
+          font-size: 0.92rem;
+          font-weight: 600;
+          overflow-wrap: anywhere;
+        }
+
+        .detail-card {
+          padding: 1.1rem 1.15rem;
+          border: 1px solid var(--line);
+          border-radius: 22px;
+          background:
+            linear-gradient(180deg, rgba(20, 36, 64, 0.94), rgba(11, 22, 40, 0.88)),
+            radial-gradient(circle at top right, rgba(124, 124, 255, 0.14), transparent 26%);
+        }
+
+        .detail-title {
+          margin: 0.6rem 0 0.3rem;
+          font-size: 1.3rem;
+          font-weight: 700;
+          line-height: 1.4;
+        }
+
+        .detail-grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          margin-top: 0.8rem;
+        }
+
+        .empty-card {
+          padding: 1.2rem;
+          border: 1px dashed rgba(31, 40, 35, 0.18);
+          border-radius: 18px;
+          background: rgba(255,255,255,0.03);
+          color: var(--muted);
+          line-height: 1.7;
+        }
+
+        .stTextInput label,
+        .stSelectbox label,
+        .stSlider label {
+          font-weight: 600 !important;
+        }
+
+        .stTextInput input,
+        .stSelectbox [data-baseweb="select"] > div,
+        .stSlider {
+          border-radius: 14px !important;
+        }
+
+        .stTextInput input {
+          background: rgba(255,255,255,0.05) !important;
+          color: var(--ink) !important;
+          border: 1px solid rgba(120, 172, 255, 0.16) !important;
+        }
+
+        .stSelectbox [data-baseweb="select"] > div {
+          background: rgba(255,255,255,0.05) !important;
+          border: 1px solid rgba(120, 172, 255, 0.16) !important;
+        }
+
+        .stButton > button {
+          border-radius: 14px !important;
+          border: 1px solid rgba(78, 230, 255, 0.22) !important;
+          background: linear-gradient(135deg, #00c2ff, #5b7cff) !important;
+          color: white !important;
+          font-weight: 600 !important;
+          box-shadow: 0 10px 24px rgba(0, 194, 255, 0.22) !important;
+        }
+
+        .stTabs [data-baseweb="tab-list"] {
+          gap: 0.4rem;
+        }
+
+        .stTabs [data-baseweb="tab"] {
+          height: 40px;
+          border-radius: 999px;
+          background: rgba(255, 255, 255, 0.05);
+          padding: 0 1rem;
+        }
+
+        @media (max-width: 900px) {
+          .metric-grid,
+          .record-meta,
+          .detail-grid {
+            grid-template-columns: 1fr 1fr;
+          }
+        }
+
+        @media (max-width: 640px) {
+          .metric-grid,
+          .record-meta,
+          .detail-grid {
+            grid-template-columns: 1fr;
+          }
+        }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
 
 
 def normalize_records(records: list[dict]) -> list[dict]:
@@ -125,15 +480,144 @@ def filter_exact(records: list[dict], field_name: str, value: str) -> list[dict]
     return [record for record in records if agent.clean_value(record.get(field_name, "")) == value]
 
 
-def render_detail(record: dict) -> None:
-    st.subheader("详情")
-    for field_name, label in DETAIL_FIELDS:
-        value = agent.clean_value(record.get(field_name, ""))
+def render_metric_cards(stats: dict) -> None:
+    cards = [
+        ("总记录", stats.get("records", 0)),
+        ("分组", stats.get("groups", 0)),
+        ("菌株", stats.get("strains", 0)),
+        ("来源", stats.get("sources", 0)),
+    ]
+    html = '<div class="metric-grid">'
+    for label, value in cards:
+        html += (
+            '<div class="metric-card">'
+            f'<div class="metric-label">{escape(str(label))}</div>'
+            f'<div class="metric-value">{escape(str(value))}</div>'
+            "</div>"
+        )
+    html += "</div>"
+    st.markdown(html, unsafe_allow_html=True)
+
+
+def render_hero(stats: dict) -> None:
+    st.markdown(
+        """
+        <div class="hero-shell">
+          <div class="hero-badge">Competitor Database</div>
+          <div class="hero-title">竞品数据库</div>
+          <div class="hero-copy">
+            这是一个面向业务展示的竞品检索站点。你可以直接搜索菌株、外部编号、来源或对接人，
+            快速定位具体竞品，再在右侧查看单条详情与关键指标。
+          </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+    render_metric_cards(stats)
+
+
+def render_summary_bar(filtered: list[dict], keyword: str) -> None:
+    strains = Counter(row["strain_name"] for row in filtered if row.get("strain_name"))
+    sources = Counter(row["source"] for row in filtered if row.get("source"))
+    top_strains = "、".join(name for name, _ in strains.most_common(3)) or "无"
+    top_sources = "、".join(name for name, _ in sources.most_common(3)) or "无"
+    text = f"当前命中 {len(filtered)} 条"
+    if keyword:
+        text += f"｜关键词：{keyword}"
+    text += f"｜高频菌株：{top_strains}｜高频来源：{top_sources}"
+    st.markdown(f'<div class="summary-bar">{escape(text)}</div>', unsafe_allow_html=True)
+
+
+def render_active_filters(filters: list[str]) -> None:
+    if not filters:
+        return
+    chips = "".join(f'<span class="chip">{escape(item)}</span>' for item in filters)
+    st.markdown(f'<div class="chip-row">{chips}</div>', unsafe_allow_html=True)
+
+
+def record_option_label(record: dict) -> str:
+    core = record.get("external_name") or record.get("strain_name") or "未命名样品"
+    source = record.get("source") or "-"
+    return f"{record.get('row_number', '')} | {core} | {source}"
+
+
+def record_card_html(record: dict) -> str:
+    chips = []
+    for key in ("category", "group_label", "source"):
+        value = record.get(key, "")
+        if value:
+            chips.append(f'<span class="chip">{escape(value)}</span>')
+
+    meta_items = []
+    for field_name, label in [
+        ("strain_name", "菌株"),
+        ("external_name", "外部编号"),
+        ("owner", "对接人"),
+        ("time_node", "时间节点"),
+    ]:
+        value = record.get(field_name, "")
+        if value:
+            meta_items.append(
+                '<div class="meta-item">'
+                f'<div class="meta-label">{escape(label)}</div>'
+                f'<div class="meta-value">{escape(value)}</div>'
+                "</div>"
+            )
+
+    title = record.get("external_name") or record.get("internal_id") or record.get("strain_name") or "未命名样品"
+    subtitle = " / ".join(
+        value
+        for value in [record.get("strain_name", ""), record.get("source", ""), record.get("owner", "")]
+        if value
+    )
+
+    return (
+        '<div class="record-card">'
+        f'<div class="chip-row">{"".join(chips)}</div>'
+        f'<div class="record-title">{escape(title)}</div>'
+        f'<div class="section-copy">{escape(subtitle or "暂无更多标签信息")}</div>'
+        f'<div class="record-meta">{"".join(meta_items)}</div>'
+        "</div>"
+    )
+
+
+def render_detail(record: dict | None) -> None:
+    st.markdown('<div class="panel-shell">', unsafe_allow_html=True)
+    st.markdown('<div class="section-kicker">Record Detail</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-title">竞品详情</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-copy">聚焦展示这一条记录最关键的信息和指标。</div>', unsafe_allow_html=True)
+
+    if not record:
+        st.markdown('<div class="empty-card">先从左侧结果里选择一条记录，再在这里查看详情。</div>', unsafe_allow_html=True)
+        st.markdown("</div>", unsafe_allow_html=True)
+        return
+
+    chips = []
+    for key in ("category", "group_label", "source"):
+        value = record.get(key, "")
+        if value:
+            chips.append(f'<span class="chip">{escape(value)}</span>')
+
+    detail_items = []
+    for field_name, label in DETAIL_FIELDS + METRIC_FIELDS:
+        value = record.get(field_name, "")
         if not value:
             continue
-        st.markdown(f"**{label}**")
-        st.write(value)
+        detail_items.append(
+            '<div class="detail-item">'
+            f'<div class="detail-label">{escape(label)}</div>'
+            f'<div class="detail-value">{escape(value)}</div>'
+            "</div>"
+        )
 
+    title = record.get("external_name") or record.get("internal_id") or record.get("strain_name") or "未命名样品"
+    st.markdown(f'<div class="chip-row">{"".join(chips)}</div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="detail-title">{escape(title)}</div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="detail-grid">{"".join(detail_items)}</div>', unsafe_allow_html=True)
+    st.markdown("</div>", unsafe_allow_html=True)
+
+
+inject_styles()
 
 payload = load_payload()
 records = normalize_records(payload.get("records", []))
@@ -145,26 +629,41 @@ stats = payload.get("stats") or {
     "sources": len({record["source"] for record in records if record["source"]}),
 }
 
-st.title("竞品数据库")
-st.caption("输入关键词或用左侧字段筛选，直接找到对应竞品信息。")
+if "keyword" not in st.session_state:
+    st.session_state.keyword = ""
 
-top_col1, top_col2, top_col3, top_col4 = st.columns(4)
-top_col1.metric("总记录", stats.get("records", 0))
-top_col2.metric("分组", stats.get("groups", 0))
-top_col3.metric("菌株", stats.get("strains", 0))
-top_col4.metric("来源", stats.get("sources", 0))
+render_hero(stats)
 
-keyword = st.text_input("搜索", placeholder="例如：阿克曼菌、HN019、M-16V、善恩康")
+quick_cols = st.columns(len(QUICK_SEARCHES))
+for col, quick_search in zip(quick_cols, QUICK_SEARCHES):
+    with col:
+        if st.button(quick_search, use_container_width=True):
+            st.session_state.keyword = quick_search
+
+keyword = st.text_input(
+    "搜索关键词",
+    key="keyword",
+    placeholder="例如：阿克曼菌、HN019、M-16V、善恩康",
+)
 
 with st.sidebar:
-    st.header("筛选")
+    st.markdown("## 筛选")
+    st.markdown("缩小结果范围，只保留你现在想看的竞品。")
     strain = st.selectbox("菌株", ["全部"] + build_options(records, "strain_name"))
     external_name = st.selectbox("外部编号", ["全部"] + build_options(records, "external_name"))
     source = st.selectbox("来源", ["全部"] + build_options(records, "source"))
     owner = st.selectbox("对接人", ["全部"] + build_options(records, "owner"))
     category = st.selectbox("类别", ["全部"] + build_options(records, "category"))
     group_label = st.selectbox("分组", ["全部"] + build_options(records, "group_label"))
-    limit = st.slider("最多显示", min_value=10, max_value=200, value=50, step=10)
+    limit = st.slider("最多显示", min_value=12, max_value=120, value=36, step=12)
+    st.markdown(
+        """
+        <div class="filter-note">
+          视觉上优先展示“搜索 + 结果 + 详情”。如果结果太多，先限定来源、菌株或外部编号，阅读会更清楚。
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
 filtered = search_records(records, keyword)
 filtered = filter_exact(filtered, "strain_name", "" if strain == "全部" else strain)
@@ -174,29 +673,53 @@ filtered = filter_exact(filtered, "owner", "" if owner == "全部" else owner)
 filtered = filter_exact(filtered, "category", "" if category == "全部" else category)
 filtered = filter_exact(filtered, "group_label", "" if group_label == "全部" else group_label)
 
-st.markdown(f"### 结果列表")
-st.caption(f"当前命中 {len(filtered)} 条")
+active_filters = []
+for label, value in [
+    ("搜索", keyword.strip()),
+    ("菌株", "" if strain == "全部" else strain),
+    ("外部编号", "" if external_name == "全部" else external_name),
+    ("来源", "" if source == "全部" else source),
+    ("对接人", "" if owner == "全部" else owner),
+    ("类别", "" if category == "全部" else category),
+    ("分组", "" if group_label == "全部" else group_label),
+]:
+    if value:
+        active_filters.append(f"{label}: {value}")
 
-left, right = st.columns([1.8, 1.1], gap="large")
+left, right = st.columns([1.75, 1.05], gap="large")
 
 with left:
-    if filtered:
-        table_rows = [{TABLE_LABELS[key]: row.get(key, "") for key in TABLE_COLUMNS} for row in filtered[:limit]]
-        df = pd.DataFrame(table_rows)
-        st.dataframe(df, use_container_width=True, hide_index=True)
+    st.markdown('<div class="panel-shell">', unsafe_allow_html=True)
+    st.markdown('<div class="section-kicker">Search Result</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-title">结果列表</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-copy">先看整体，再决定点开哪一条竞品详情。</div>', unsafe_allow_html=True)
 
-        options = {
-            f"{row.get('row_number', '')} | {row.get('external_name', '') or row.get('strain_name', '')} | {row.get('source', '')}": index
-            for index, row in enumerate(filtered[:limit])
-        }
-        selected_label = st.selectbox("选择一条记录查看详情", list(options.keys()))
-        selected_record = filtered[options[selected_label]]
+    render_summary_bar(filtered, keyword.strip())
+    render_active_filters(active_filters)
+
+    if filtered:
+        visible_records = filtered[:limit]
+        options = {record_option_label(record): index for index, record in enumerate(visible_records)}
+        selected_label = st.selectbox("当前查看", list(options.keys()), label_visibility="collapsed")
+        selected_record = visible_records[options[selected_label]]
+
+        cards_tab, table_tab = st.tabs(["卡片视图", "表格视图"])
+
+        with cards_tab:
+            for record in visible_records[:12]:
+                st.markdown(record_card_html(record), unsafe_allow_html=True)
+
+        with table_tab:
+            table_rows = [{TABLE_LABELS[key]: row.get(key, "") for key in TABLE_COLUMNS} for row in visible_records]
+            st.dataframe(pd.DataFrame(table_rows), use_container_width=True, hide_index=True)
     else:
-        st.info("没有找到匹配记录。")
         selected_record = None
+        st.markdown(
+            '<div class="empty-card">没有找到匹配记录。建议换一个关键词，或者放宽左侧筛选条件。</div>',
+            unsafe_allow_html=True,
+        )
+
+    st.markdown("</div>", unsafe_allow_html=True)
 
 with right:
-    if selected_record:
-        render_detail(selected_record)
-    else:
-        st.write("先搜索或筛选出结果。")
+    render_detail(selected_record)
