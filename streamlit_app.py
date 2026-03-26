@@ -98,26 +98,26 @@ def inject_styles() -> None:
         @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Noto+Sans+SC:wght@400;500;700&display=swap');
 
         :root {
-          --bg-start: #101722;
-          --bg-end: #1b2230;
-          --paper: rgba(27, 34, 48, 0.72);
-          --paper-strong: rgba(36, 45, 62, 0.82);
-          --ink: #f4f1eb;
-          --muted: #b0b6c2;
-          --line: rgba(180, 196, 214, 0.14);
-          --accent: #88d7cb;
-          --accent-soft: rgba(136, 215, 203, 0.12);
-          --warm: #f1a97a;
-          --violet: #b7a7d9;
-          --shadow: 0 28px 64px rgba(2, 8, 20, 0.42);
+          --bg-start: #f8f4ee;
+          --bg-end: #eef3f1;
+          --paper: rgba(255, 252, 247, 0.82);
+          --paper-strong: rgba(255, 255, 255, 0.88);
+          --ink: #243038;
+          --muted: #6f7c84;
+          --line: rgba(138, 160, 170, 0.18);
+          --accent: #8bcfc2;
+          --accent-soft: rgba(139, 207, 194, 0.18);
+          --warm: #efb08c;
+          --violet: #cbbce5;
+          --shadow: 0 24px 54px rgba(119, 124, 136, 0.14);
           --radius: 22px;
         }
 
         .stApp {
           background:
-            radial-gradient(circle at top left, rgba(183, 167, 217, 0.16), transparent 26%),
-            radial-gradient(circle at top right, rgba(136, 215, 203, 0.14), transparent 22%),
-            radial-gradient(circle at bottom right, rgba(241, 169, 122, 0.12), transparent 20%),
+            radial-gradient(circle at top left, rgba(203, 188, 229, 0.28), transparent 26%),
+            radial-gradient(circle at top right, rgba(139, 207, 194, 0.24), transparent 22%),
+            radial-gradient(circle at bottom right, rgba(239, 176, 140, 0.18), transparent 20%),
             linear-gradient(180deg, var(--bg-start), var(--bg-end));
           color: var(--ink);
           font-family: "Space Grotesk", "Noto Sans SC", sans-serif;
@@ -129,8 +129,8 @@ def inject_styles() -> None:
         }
 
         [data-testid="stSidebar"] {
-          background: rgba(20, 26, 38, 0.88);
-          border-right: 1px solid rgba(180, 196, 214, 0.10);
+          background: rgba(247, 243, 237, 0.86);
+          border-right: 1px solid rgba(138, 160, 170, 0.12);
           backdrop-filter: blur(18px);
         }
 
@@ -151,8 +151,8 @@ def inject_styles() -> None:
           border: 1px solid var(--line);
           border-radius: 28px;
           background:
-            linear-gradient(140deg, rgba(43, 50, 66, 0.92), rgba(26, 32, 45, 0.86)),
-            radial-gradient(circle at top right, rgba(136, 215, 203, 0.12), transparent 30%);
+            linear-gradient(140deg, rgba(255, 252, 247, 0.95), rgba(244, 240, 234, 0.86)),
+            radial-gradient(circle at top right, rgba(139, 207, 194, 0.18), transparent 30%);
           box-shadow: var(--shadow);
           backdrop-filter: blur(18px);
         }
@@ -165,7 +165,7 @@ def inject_styles() -> None:
           width: 180px;
           height: 180px;
           border-radius: 50%;
-          background: radial-gradient(circle, rgba(183, 167, 217, 0.22), rgba(183, 167, 217, 0));
+          background: radial-gradient(circle, rgba(203, 188, 229, 0.32), rgba(203, 188, 229, 0));
           filter: blur(4px);
         }
 
@@ -175,8 +175,8 @@ def inject_styles() -> None:
           gap: 0.45rem;
           padding: 0.42rem 0.8rem;
           border-radius: 999px;
-          background: rgba(136, 215, 203, 0.12);
-          border: 1px solid rgba(136, 215, 203, 0.18);
+          background: rgba(139, 207, 194, 0.18);
+          border: 1px solid rgba(139, 207, 194, 0.22);
           color: var(--accent);
           font-size: 0.76rem;
           font-weight: 700;
@@ -210,8 +210,8 @@ def inject_styles() -> None:
           padding: 1rem 1rem 0.95rem;
           border: 1px solid var(--line);
           border-radius: 18px;
-          background: linear-gradient(180deg, rgba(47, 56, 74, 0.88), rgba(35, 43, 59, 0.82));
-          box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+          background: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(246, 241, 236, 0.82));
+          box-shadow: inset 0 1px 0 rgba(255,255,255,0.55);
         }
 
         .metric-label {
@@ -260,9 +260,9 @@ def inject_styles() -> None:
           margin: 0.8rem 0 0.25rem;
           padding: 0.85rem 1rem;
           border-radius: 16px;
-          background: linear-gradient(135deg, rgba(136, 215, 203, 0.12), rgba(183, 167, 217, 0.10));
-          border: 1px solid rgba(136, 215, 203, 0.14);
-          color: #eef5f2;
+          background: linear-gradient(135deg, rgba(139, 207, 194, 0.18), rgba(203, 188, 229, 0.16));
+          border: 1px solid rgba(139, 207, 194, 0.16);
+          color: #35504c;
           font-size: 0.92rem;
           font-weight: 600;
         }
@@ -271,8 +271,8 @@ def inject_styles() -> None:
           margin-top: 0.8rem;
           padding: 0.8rem 0.9rem;
           border-radius: 16px;
-          background: rgba(255, 255, 255, 0.04);
-          border: 1px solid rgba(120, 172, 255, 0.12);
+          background: rgba(255, 255, 255, 0.52);
+          border: 1px solid rgba(138, 160, 170, 0.12);
           color: var(--muted);
           font-size: 0.84rem;
           line-height: 1.65;
@@ -290,9 +290,9 @@ def inject_styles() -> None:
           align-items: center;
           padding: 0.4rem 0.72rem;
           border-radius: 999px;
-          background: rgba(255, 255, 255, 0.05);
+          background: rgba(255, 255, 255, 0.72);
           border: 1px solid var(--line);
-          color: #eef4f0;
+          color: #35504c;
           font-size: 0.76rem;
         }
 
@@ -302,7 +302,7 @@ def inject_styles() -> None:
           border-radius: 18px;
           background: var(--paper-strong);
           margin-bottom: 0.8rem;
-          box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+          box-shadow: inset 0 1px 0 rgba(255,255,255,0.68);
         }
 
         .record-title {
@@ -327,8 +327,8 @@ def inject_styles() -> None:
         .detail-item {
           padding: 0.72rem 0.82rem;
           border-radius: 14px;
-          background: rgba(255, 255, 255, 0.04);
-          border: 1px solid rgba(180, 196, 214, 0.08);
+          background: rgba(247, 243, 237, 0.82);
+          border: 1px solid rgba(138, 160, 170, 0.10);
         }
 
         .meta-label,
@@ -350,8 +350,8 @@ def inject_styles() -> None:
           border: 1px solid var(--line);
           border-radius: 22px;
           background:
-            linear-gradient(180deg, rgba(46, 55, 72, 0.94), rgba(30, 37, 50, 0.90)),
-            radial-gradient(circle at top right, rgba(183, 167, 217, 0.12), transparent 26%);
+            linear-gradient(180deg, rgba(255,255,255,0.94), rgba(244, 239, 233, 0.90)),
+            radial-gradient(circle at top right, rgba(203, 188, 229, 0.16), transparent 26%);
         }
 
         .detail-title {
@@ -370,7 +370,7 @@ def inject_styles() -> None:
           padding: 1.2rem;
           border: 1px dashed rgba(31, 40, 35, 0.18);
           border-radius: 18px;
-          background: rgba(255,255,255,0.03);
+          background: rgba(255,255,255,0.55);
           color: var(--muted);
           line-height: 1.7;
         }
@@ -401,6 +401,10 @@ def inject_styles() -> None:
           color: #1c2430 !important;
         }
 
+        .stSelectbox [data-baseweb="select"] * {
+          color: #1c2430 !important;
+        }
+
         .stTextInput input::placeholder {
           color: #758091 !important;
           -webkit-text-fill-color: #758091 !important;
@@ -408,11 +412,11 @@ def inject_styles() -> None:
 
         .stButton > button {
           border-radius: 14px !important;
-          border: 1px solid rgba(136, 215, 203, 0.18) !important;
-          background: linear-gradient(135deg, #8fd2c8, #b7a7d9) !important;
+          border: 1px solid rgba(139, 207, 194, 0.20) !important;
+          background: linear-gradient(135deg, #a9ddd3, #d2c5ea) !important;
           color: #18202a !important;
           font-weight: 600 !important;
-          box-shadow: 0 10px 24px rgba(120, 134, 168, 0.18) !important;
+          box-shadow: 0 10px 24px rgba(183, 188, 201, 0.20) !important;
         }
 
         .stTabs [data-baseweb="tab-list"] {
@@ -422,7 +426,7 @@ def inject_styles() -> None:
         .stTabs [data-baseweb="tab"] {
           height: 40px;
           border-radius: 999px;
-          background: rgba(255, 255, 255, 0.05);
+          background: rgba(255, 255, 255, 0.68);
           padding: 0 1rem;
         }
 
